@@ -5,9 +5,106 @@
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
 #
 
+
+# Load any user customizations prior to load
+#
+if [ -d $HOME/.zsh.before/ ]; then
+  if [ "$(ls -A $HOME/.zsh.before/)" ]; then
+    for config_file ($HOME/.zsh.before/*.zsh) source $config_file
+  fi
+fi
+
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
 # Customize to your needs...
+
+# PATH stuff
+#
+
+pathAppend() {
+  # Only adds to the path if it's not already there
+  if ! echo $PATH | egrep -q "(^|:)$1($|:)" ; then
+    PATH=$PATH:$1
+  fi
+}
+
+# Remove duplicate entries from PATH:
+PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++{if (NR > 1) printf ORS; printf $a[$1]}')
+
+
+
+
+# Makes git auto completion faster favouring for local completions
+__git_files () {
+    _wanted files expl 'local files' _files
+}
+
+
+# Key Bindings for console
+# http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html
+# http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Zle-Builtins
+# http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Standard-Widgets
+
+bindkey -v                                          # Use vi key bindings
+bindkey '^r' history-incremental-pattern-search-backward # backwards search supporting regex
+
+# emacs style
+bindkey '^a' beginning-of-line
+bindkey '^e' end-of-line
+
+# Make numpad enter work
+bindkey -s "^[Op" "0"
+bindkey -s "^[Ol" "."
+bindkey -s "^[OM" "^M"
+
+
+
+# Use Ctrl-x,Ctrl-l to get the output of the last command
+zmodload -i zsh/parameter
+insert-last-command-output() {
+    LBUFFER+="$(eval $history[$((HISTCMD-1))])"
+}
+zle -N insert-last-command-output
+bindkey "^X^L" insert-last-command-output
+
+
+
+
+
+
+# Load any custom after code
+if [ -d $HOME/.zsh.after/ ]; then
+  if [ "$(ls -A $HOME/.zsh.after/)" ]; then
+    for config_file ($HOME/.zsh.after/*.zsh) source $config_file
+  fi
+fi
+
+
+
+# Some of the included code is from https://github.com/skwp/dotfiles
+#
+# Copyright (c) 2011-2012, Yan Pritzker
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
